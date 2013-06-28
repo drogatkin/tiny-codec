@@ -19,12 +19,12 @@
 
 package davaguine.jmac.decoder;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import davaguine.jmac.info.CompressionLevel;
 import davaguine.jmac.info.SpecialFrame;
 import davaguine.jmac.tools.JMACException;
-
-import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * Author: Dmitry Vaguine
