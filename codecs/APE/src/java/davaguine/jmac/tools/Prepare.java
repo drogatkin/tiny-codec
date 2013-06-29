@@ -420,7 +420,7 @@ public class Prepare {
                     LV = (LV + 0x800000) | 0x800000;
 
                 samples[sampleIndex++] = RV;
-                samples[sampleIndex++] = RV;
+                samples[sampleIndex++] = LV;
                 crc.append24(RV, LV);
             }
         } else if (channels == 1) {
