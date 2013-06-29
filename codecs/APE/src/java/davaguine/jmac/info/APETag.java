@@ -97,6 +97,11 @@ public class APETag implements Comparator {
             Analyze();
     }
 
+    public void close() throws IOException {
+    	if (m_spIO != null)
+    		m_spIO.close();
+    }
+    
     // save the tag to the I/O source (bUseOldID3 forces it to save as an ID3v1.1 tag instead of an APE tag)
     public void Save() throws IOException {
         Save(false);
