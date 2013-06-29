@@ -108,6 +108,11 @@ public class APEDecompressOld extends IAPEDecompress {
 
         return nBlocksRetrieved;
     }
+    
+    @Override
+    public int GetData(int[] pBuffer, int nBlocks) throws IOException {
+    	throw new UnsupportedOperationException();
+    }
 
     public void Seek(int nBlockOffset) throws IOException {
         InitializeDecompressor();

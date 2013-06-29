@@ -20,6 +20,7 @@
 package davaguine.jmac.decoder;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import davaguine.jmac.info.APEFileInfo;
 import davaguine.jmac.info.APEInfo;
@@ -80,6 +81,7 @@ public class APEDecompress extends IAPEDecompress {
         m_bIsRanged = (m_nStartBlock != 0) || (m_nFinishBlock != m_spAPEInfo.getApeInfoTotalBlocks());
     }
 
+    @Override
     public int GetData(byte[] pBuffer, int nBlocks) throws IOException {
         InitializeDecompressor();
 
@@ -103,6 +105,44 @@ public class APEDecompress extends IAPEDecompress {
             if (nBlocksThisPass > 0) {
                 m_cbFrameBuffer.Get(pBuffer, index, nBlocksThisPass * m_nBlockAlign);
                 index += nBlocksThisPass * m_nBlockAlign;
+                nBlocksLeft -= nBlocksThisPass;
+                m_nFrameBufferFinishedBlocks -= nBlocksThisPass;
+            }
+        }
+
+        // calculate the blocks retrieved
+        int nBlocksRetrieved = nBlocksToRetrieve - nBlocksLeft;
+
+        // update position
+        m_nCurrentBlock += nBlocksRetrieved;
+        return nBlocksRetrieved;
+    }
+    
+    /** decode samples in provided buffer
+     * @param samples buffer allocated by caller and should have space
+     * nBlocks * channels
+     * @param number samples to decoded 
+     * @return number of samples decoded in the buffer
+     * @exception if decoding or reading problem happens
+     */
+    @Override
+    public int GetData(int[] pBuffer, int nBlocks) throws IOException {
+    	InitializeDecompressor();
+
+        // cap
+        int nBlocksUntilFinish = m_nFinishBlock - m_nCurrentBlock;
+        int nBlocksToRetrieve = Math.min(nBlocks, nBlocksUntilFinish);
+
+        // get the data
+        int nBlocksLeft = nBlocksToRetrieve;
+        int nBlocksThisPass = 1;
+        while ((nBlocksLeft > 0) && (nBlocksThisPass > 0)) {
+            // fill up the frame buffer
+        	nBlocksThisPass = FillSamplesBuffer(pBuffer, nBlocksLeft);
+
+   
+            // remove as much as possible
+            if (nBlocksThisPass > 0) {
                 nBlocksLeft -= nBlocksThisPass;
                 m_nFrameBufferFinishedBlocks -= nBlocksThisPass;
             }
@@ -371,6 +411,62 @@ public class APEDecompress extends IAPEDecompress {
         m_nRealFrame = nFrameIndex;
     }
 
+    public int DecodeBlocksToSamplesBuffer(int[] samples, int sampleIndex, int nBlocks) throws IOException {
+    	int nBlocksProcessed = 0;
+    	 try {
+             if (m_wfeInput.nChannels == 2) {
+                 if ((m_nSpecialCodes & SpecialFrame.SPECIAL_FRAME_LEFT_SILENCE) > 0 &&
+                         (m_nSpecialCodes & SpecialFrame.SPECIAL_FRAME_RIGHT_SILENCE) > 0) {
+                     for (nBlocksProcessed = 0; nBlocksProcessed < nBlocks; nBlocksProcessed++) {
+                    	 sampleIndex=m_Prepare.unprepare(samples, 0, 0, sampleIndex, m_wfeInput, m_nCRC);
+                     }
+                 } else if ((m_nSpecialCodes & SpecialFrame.SPECIAL_FRAME_PSEUDO_STEREO) > 0) {
+                     for (nBlocksProcessed = 0; nBlocksProcessed < nBlocks; nBlocksProcessed++) {
+                         int X = m_spNewPredictorX.DecompressValue(m_spUnBitArray.DecodeValueRange(m_BitArrayStateX));
+                         sampleIndex = m_Prepare.unprepare(samples, X, 0, sampleIndex, m_wfeInput, m_nCRC);
+                     }
+                 } else {
+                     if (m_spAPEInfo.getApeInfoFileVersion() >= 3950) {
+                         for (nBlocksProcessed = 0; nBlocksProcessed < nBlocks; nBlocksProcessed++) {
+                             int nY = m_spUnBitArray.DecodeValueRange(m_BitArrayStateY);
+                             int nX = m_spUnBitArray.DecodeValueRange(m_BitArrayStateX);
+                             int Y = m_spNewPredictorY.DecompressValue(nY, m_nLastX);
+                             int X = m_spNewPredictorX.DecompressValue(nX, Y);
+                             m_nLastX = X;
+
+                             sampleIndex = m_Prepare.unprepare(samples, X, Y, sampleIndex, m_wfeInput, m_nCRC);
+                         }
+                     } else {
+                         for (nBlocksProcessed = 0; nBlocksProcessed < nBlocks; nBlocksProcessed++) {
+                             int X = m_spNewPredictorX.DecompressValue(m_spUnBitArray.DecodeValueRange(m_BitArrayStateX));
+                             int Y = m_spNewPredictorY.DecompressValue(m_spUnBitArray.DecodeValueRange(m_BitArrayStateY));
+
+                             sampleIndex = m_Prepare.unprepare(samples, X, Y, sampleIndex, m_wfeInput, m_nCRC);
+                             m_cbFrameBuffer.UpdateAfterDirectWrite(m_nBlockAlign);
+                         }
+                     }
+                 }
+             } else {
+                 if ((m_nSpecialCodes & SpecialFrame.SPECIAL_FRAME_MONO_SILENCE) > 0) {
+                     for (nBlocksProcessed = 0; nBlocksProcessed < nBlocks; nBlocksProcessed++) {
+                    	 sampleIndex = m_Prepare.unprepare(samples, 0, 0, sampleIndex, m_wfeInput, m_nCRC);
+                     }
+                 } else {
+                     for (nBlocksProcessed = 0; nBlocksProcessed < nBlocks; nBlocksProcessed++) {
+                         int X = m_spNewPredictorX.DecompressValue(m_spUnBitArray.DecodeValueRange(m_BitArrayStateX));
+                         sampleIndex = m_Prepare.unprepare(samples, X, 0, sampleIndex, m_wfeInput, m_nCRC);
+                         m_cbFrameBuffer.UpdateAfterDirectWrite(m_nBlockAlign);
+                     }
+                 }
+             }
+         } catch (JMACException e) {
+             m_bErrorDecodingCurrentFrame = true;
+         }
+
+         m_nCurrentFrameBufferBlock += nBlocks;
+         return nBlocksProcessed*m_wfeInput.nChannels;
+    }
+    
     protected void DecodeBlocksToFrameBuffer(int nBlocks) throws IOException {
         // decode the samples
         int nBlocksProcessed = 0;
@@ -491,6 +587,61 @@ public class APEDecompress extends IAPEDecompress {
         if (invalidChecksum)
             throw new JMACException("Invalid Checksum");
     }
+    
+    protected int FillSamplesBuffer(int[] samplesBuffer, int nMaxBlocks) throws IOException {
+        // determine the maximum blocks we can decode
+        // note that we won't do end capping because we can't use data
+        // until EndFrame(...) successfully handles the frame
+        // that means we may decode a little extra in end capping cases
+        // but this allows robust error handling of bad frames
+System.err.println("Fill samples tp "+nMaxBlocks);
+        boolean invalidChecksum = false;
+
+        // loop and decode data
+        int nBlocksLeft = nMaxBlocks;
+        int nSamplesOffset = 0;
+        while (nBlocksLeft > 0) {
+            int nFrameBlocks = this.getApeInfoFrameBlocks(m_nCurrentFrame);
+            if (nFrameBlocks < 0)
+                break;
+
+            int nFrameOffsetBlocks = m_nCurrentFrameBufferBlock % this.getApeInfoBlocksPerFrame();
+            int nFrameBlocksLeft = nFrameBlocks - nFrameOffsetBlocks;
+            int nBlocksThisPass = Math.min(nFrameBlocksLeft, nBlocksLeft);
+
+            // start the frame if we need to
+            if (nFrameOffsetBlocks == 0)
+                StartFrame();
+
+            // decode data
+            int nDecodedBlocks = DecodeBlocksToSamplesBuffer(samplesBuffer, nSamplesOffset, nBlocksThisPass);
+            System.err.println("decoded blocks "+nDecodedBlocks);
+            // end the frame if we need to
+            if ((nFrameOffsetBlocks + nBlocksThisPass) >= nFrameBlocks) {
+            	 System.err.println("error");
+                EndFrame();
+                if (m_bErrorDecodingCurrentFrame) {
+                	// add silence
+                	Arrays.fill(samplesBuffer, nSamplesOffset, nSamplesOffset+nDecodedBlocks,
+                			this.getApeInfoBitsPerSample() == 8 ?127:0);
+                    // seek to try to synchronize after an error
+                    SeekToFrame(m_nCurrentFrame);
+
+                    // save the return value
+                    invalidChecksum = true;
+                } else
+                	nSamplesOffset +=nDecodedBlocks;
+            } else
+            	nSamplesOffset +=nDecodedBlocks;
+            System.err.println("---decoded blocks -- ret "+nSamplesOffset);
+            nBlocksLeft -= nBlocksThisPass;
+        }
+
+        if (invalidChecksum)
+            throw new JMACException("Invalid Checksum");
+        System.err.println("decoded blocks -- ret "+nSamplesOffset);
+        return nSamplesOffset;
+    }
 
     protected void StartFrame() throws IOException {
         m_nCRC = new Crc32();
@@ -572,4 +723,6 @@ public class APEDecompress extends IAPEDecompress {
     protected int m_nCurrentFrameBufferBlock;
     protected int m_nFrameBufferFinishedBlocks;
     protected CircleBuffer m_cbFrameBuffer = new CircleBuffer();
+    
+    protected int[] samplesBuffer;
 }

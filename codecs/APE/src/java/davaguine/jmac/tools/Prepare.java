@@ -390,4 +390,55 @@ public class Prepare {
         }
         crc.prefinalizeCrc();
     }
+
+	public int unprepare(int[] samples, int X, int Y, int sampleIndex, WaveFormat waveFormat, Crc32 crc) {
+        // decompress and convert from (x,y) -> (l,r)
+        // sort of long and ugly.... sorry
+        int channels = waveFormat.nChannels;
+        int bitsPerSample = waveFormat.wBitsPerSample;
+        if (channels == 2) {
+            if (bitsPerSample == 16) {
+                // get the right and left values
+                short nR = (short) (X - (Y / 2));
+                short nL = (short) (nR + Y);
+                samples[sampleIndex++] = nR;
+                samples[sampleIndex++] = nL;
+                crc.append(nR, nL);
+            } else if (bitsPerSample == 8) {
+                byte R = (byte) (X - (Y / 2) + 128);
+                byte L = (byte) (R + Y);
+                samples[sampleIndex++] = R;
+                samples[sampleIndex++] = L;
+                crc.append(R, L);
+            } else if (bitsPerSample == 24) {
+                int RV = X - (Y / 2);
+                int LV = RV + Y;
+
+                if (RV < 0)
+                    RV = (RV + 0x800000) | 0x800000;
+                if (LV < 0)
+                    LV = (LV + 0x800000) | 0x800000;
+
+                samples[sampleIndex++] = RV;
+                samples[sampleIndex++] = RV;
+                crc.append24(RV, LV);
+            }
+        } else if (channels == 1) {
+            if (bitsPerSample == 16) {
+            	samples[sampleIndex++] = X;
+                crc.append((short) X);
+            } else if (bitsPerSample == 8) {
+                byte R = (byte) (X + 128);
+                samples[sampleIndex++] = R;
+                crc.append(R);
+            } else if (bitsPerSample == 24) {
+                if (X < 0)
+                    X = (X + 0x800000) | 0x800000;
+
+                samples[sampleIndex++] = X;
+                crc.append24(X);
+            }
+        }
+		return sampleIndex;
+	}
 }

@@ -49,6 +49,19 @@ public abstract class IAPEDecompress {
     public abstract int GetData(byte[] pBuffer, int nBlocks) throws IOException;
 
     //////////////////////////////////////////////////////////////////////////////////////////////
+    // GetData(...) - gets raw decompressed audio
+	//
+	// Parameters:
+	//	int * pBuffer
+	//		a pointer to a buffer to put the data samples into
+	//	int nBlocks
+	//		the number of audio blocks desired (see note at intro about blocks vs. samples)
+	//	int * pBlocksRetrieved
+	//		the number of blocks actually retrieved (could be less at end of file or on critical failure)
+	//////////////////////////////////////////////////////////////////////////////////////////////   
+    public abstract int GetData(int[] pBuffer, int nBlocks) throws IOException;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
     // Seek(...) - seeks
     //
     // Parameters:
