@@ -391,7 +391,7 @@ public class Prepare {
         crc.prefinalizeCrc();
     }
 
-	public int unprepare(int[] samples, int X, int Y, int sampleIndex, WaveFormat waveFormat, Crc32 crc) {
+	final public int unprepare(int[] samples, int X, int Y, int sampleIndex, WaveFormat waveFormat, Crc32 crc) {
         // decompress and convert from (x,y) -> (l,r)
         // sort of long and ugly.... sorry
         int channels = waveFormat.nChannels;

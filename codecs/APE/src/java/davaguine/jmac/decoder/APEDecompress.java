@@ -422,7 +422,7 @@ public class APEDecompress extends IAPEDecompress {
      * @param nBlocks number of samples decoded
      * @throws IOException
      */
-    protected  void  DecodeBlocksToSamplesBuffer(int[] samples, int sampleIndex, int nBlocks) throws IOException {
+    final protected  void  DecodeBlocksToSamplesBuffer(int[] samples, int sampleIndex, int nBlocks) throws IOException {
     	int nBlocksProcessed = 0;
     	 try {
              if (m_wfeInput.nChannels == 2) {
@@ -604,7 +604,7 @@ public class APEDecompress extends IAPEDecompress {
      * @return actual number of decoded samples
      * @throws IOException
      */
-	protected int FillSamplesBuffer(int[] samplesBuffer, int nSamplesOffset)
+	final protected int FillSamplesBuffer(int[] samplesBuffer, int nSamplesOffset)
 			throws IOException {
 		// determine the maximum blocks we can decode
 		// note that we won't do end capping because we can't use data
