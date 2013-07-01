@@ -79,21 +79,20 @@ public class PredictorDecompress3950toCurrent extends IPredictorDecompress {
         }
 
         // stage 2: NNFilter
-        Object obj;
-        if ((obj = m_pNNFilter2) != null)
-            nA = ((NNFilter) (obj)).Decompress(nA);
-        if ((obj = m_pNNFilter1) != null)
-            nA = ((NNFilter) (obj)).Decompress(nA);
-        if ((obj = m_pNNFilter) != null)
-            nA = ((NNFilter) (obj)).Decompress(nA);
+		if (m_pNNFilter2 != null)
+			nA = m_pNNFilter2.Decompress(nA);
+		if (m_pNNFilter1 != null)
+			nA = m_pNNFilter1.Decompress(nA);
+		if (m_pNNFilter != null)
+			nA = m_pNNFilter.Decompress(nA);		
 
         // stage 1: multiple predictors (order 2 and offset 1)
-        int indexA = ((RollBufferFastInt) (obj = m_rbPredictionA)).index;
+        int indexA = m_rbPredictionA.index;
         RollBufferFastInt predictB;
         int indexB = (predictB = m_rbPredictionB).index;
         int ai[];
         int l;
-        (ai = ((RollBufferFastInt) (obj)).m_pData)[indexA] = l = m_nLastValueA;
+        (ai = m_rbPredictionA.m_pData)[indexA] = l = m_nLastValueA;
         int l1 = indexA - 1;
         ai[l1] = l - ai[l1];
 
@@ -153,7 +152,7 @@ public class PredictorDecompress3950toCurrent extends IPredictorDecompress {
         scaledFilterALV = nCurrentA + ((scaledFilterALV * 31) >> 5);
         m_nLastValueA = nCurrentA;
 
-        ((RollBufferFastInt) (obj)).index++;
+        m_rbPredictionA.index++;
         predictB.index++;
         adaptA.index++;
         adaptB.index++;
@@ -164,13 +163,13 @@ public class PredictorDecompress3950toCurrent extends IPredictorDecompress {
     }
 
     public void Flush() {
-        NNFilter nnfilter;
-        if ((nnfilter = m_pNNFilter) != null)
-            nnfilter.Flush();
-        if ((nnfilter = m_pNNFilter1) != null)
-            nnfilter.Flush();
-        if ((nnfilter = m_pNNFilter2) != null)
-            nnfilter.Flush();
+		if (m_pNNFilter != null)
+			m_pNNFilter.Flush();
+		if (m_pNNFilter1 != null) 
+			m_pNNFilter1.Flush();
+			if (m_pNNFilter2 != null)
+				m_pNNFilter2.Flush();
+		
 
         Arrays.fill(m_aryMA, 0);
         Arrays.fill(m_aryMB, 0);

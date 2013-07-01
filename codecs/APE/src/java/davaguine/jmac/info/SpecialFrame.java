@@ -28,4 +28,6 @@ public class SpecialFrame {
     public final static int SPECIAL_FRAME_LEFT_SILENCE = 1;
     public final static int SPECIAL_FRAME_RIGHT_SILENCE = 2;
     public final static int SPECIAL_FRAME_PSEUDO_STEREO = 4;
+    
+    public final static int SPECIAL_FRAME_ANY = 7;
 }

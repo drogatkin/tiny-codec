@@ -474,6 +474,98 @@ public class APEDecompress extends IAPEDecompress {
          m_nCurrentFrameBufferBlock += nBlocks;
     }
     
+    /** does actual decoding in samples  buffer of specified number sample
+     * 
+     * @param samples buffer
+     * @param sampleIndex start index in the samples buffer absolute
+     * @param nBlocks number of samples decoded
+     * @throws IOException
+     */
+	final protected void DecodeBlocksToSamplesBuffer2(int[] samples, int sampleIndex, int nBlocks) throws IOException {
+		int nBlocksProcessed = 0;
+		try {
+			int X = 0, Y = 0;
+			int bitsPerSample = m_wfeInput.wBitsPerSample;
+			boolean version3950 = m_spAPEInfo.getApeInfoFileVersion() >= 3950;
+			for (nBlocksProcessed = 0; nBlocksProcessed < nBlocks; nBlocksProcessed++) {
+				switch (m_wfeInput.nChannels) {
+				case 2:
+					if ((m_nSpecialCodes & (SpecialFrame.SPECIAL_FRAME_ANY)) > 0) {
+						if ((m_nSpecialCodes & SpecialFrame.SPECIAL_FRAME_PSEUDO_STEREO) > 0)
+							X = m_spNewPredictorX.DecompressValue(m_spUnBitArray.DecodeValueRange(m_BitArrayStateX));
+					} else {
+						if (version3950) {
+							int nY = m_spUnBitArray.DecodeValueRange(m_BitArrayStateY);
+							int nX = m_spUnBitArray.DecodeValueRange(m_BitArrayStateX);
+							Y = m_spNewPredictorY.DecompressValue(nY, m_nLastX);
+							X = m_spNewPredictorX.DecompressValue(nX, Y);
+							m_nLastX = X;
+						} else {
+							X = m_spNewPredictorX.DecompressValue(m_spUnBitArray.DecodeValueRange(m_BitArrayStateX));
+							Y = m_spNewPredictorY.DecompressValue(m_spUnBitArray.DecodeValueRange(m_BitArrayStateY));
+						}
+					}
+					switch (bitsPerSample) {
+					case 16:
+						short nR = (short) (X - (Y / 2));
+						short nL = (short) (nR + Y);
+						samples[sampleIndex++] = nR;
+						samples[sampleIndex++] = nL;
+						m_nCRC.append(nR, nL);
+						break;
+					case 24:
+						int RV = X - (Y / 2);
+						int LV = RV + Y;
+
+						if (RV < 0)
+							RV = (RV + 0x800000) | 0x800000;
+						if (LV < 0)
+							LV = (LV + 0x800000) | 0x800000;
+
+						samples[sampleIndex++] = RV;
+						samples[sampleIndex++] = LV;
+						m_nCRC.append24(RV, LV);
+						break;
+					case 8:
+						byte R = (byte) (X - (Y / 2) + 128);
+						byte L = (byte) (R + Y);
+						samples[sampleIndex++] = R;
+						samples[sampleIndex++] = L;
+						m_nCRC.append(R, L);
+						break;
+
+					}
+					break;
+				case 1:
+					if ((m_nSpecialCodes & SpecialFrame.SPECIAL_FRAME_MONO_SILENCE) == 0)
+						X = m_spNewPredictorX.DecompressValue(m_spUnBitArray.DecodeValueRange(m_BitArrayStateX));
+					switch (bitsPerSample) {
+					case 16:
+						samples[sampleIndex++] = X;
+						m_nCRC.append((short) X);
+						break;
+					case 8:
+						byte R = (byte) (X + 128);
+						samples[sampleIndex++] = R;
+						m_nCRC.append(R);
+						break;
+					case 24:
+						if (X < 0)
+							X = (X + 0x800000) | 0x800000;
+						samples[sampleIndex++] = X;
+						m_nCRC.append24(X);
+						break;
+					}
+					break;
+				}
+			}
+		} catch (JMACException e) {
+			m_bErrorDecodingCurrentFrame = true;
+		}
+
+		m_nCurrentFrameBufferBlock += nBlocks;
+	}
+    
     protected void DecodeBlocksToFrameBuffer(int nBlocks) throws IOException {
         // decode the samples
         int nBlocksProcessed = 0;
@@ -632,7 +724,7 @@ public class APEDecompress extends IAPEDecompress {
 				StartFrame();
 
 			// decode data
-			DecodeBlocksToSamplesBuffer(samplesBuffer, nSamplesOffset,
+			DecodeBlocksToSamplesBuffer2(samplesBuffer, nSamplesOffset,
 					nBlocksThisPass);
 			// end the frame if we need to
 			if ((nFrameOffsetBlocks + nBlocksThisPass) >= nFrameBlocks) {
