@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="codecs/APE/src/java"/>
+	<classpathentry kind="src" path="tools/IO/src/java"/>
 	<classpathentry kind="src" path="tools/ISO/src/java"/>
 	<classpathentry kind="src" path="codecs/JustTags/src/java"/>
 	<classpathentry kind="src" path="codecs/ALAC/src/java"/>
