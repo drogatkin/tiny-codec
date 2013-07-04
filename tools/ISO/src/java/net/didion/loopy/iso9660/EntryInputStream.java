@@ -68,6 +68,17 @@ class EntryInputStream extends InputStream {
         }
         return len;
     }
+    
+    public long seek(long position) {
+    	if (position < 0)
+    		position = 0;
+    	else if (position > pos+rem)
+    		position = pos+rem;
+    	long adj = position - pos;
+    	pos += adj;
+    	rem -= adj;
+    	return pos;
+    }
 
     public int available() {
         return this.rem;

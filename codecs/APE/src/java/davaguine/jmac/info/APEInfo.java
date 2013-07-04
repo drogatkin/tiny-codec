@@ -171,6 +171,8 @@ public class APEInfo {
     }
 
     public int getApeInfoSeekByte(int nFrame) {
+    	//new Exception("Requesting "+nFrame+" from total:"+m_APEFileInfo.nTotalFrames).printStackTrace();
+    	//return 256;
         return (nFrame < 0 || nFrame >= m_APEFileInfo.nTotalFrames) ? 0 : m_APEFileInfo.spSeekByteTable[nFrame] + m_APEFileInfo.nJunkHeaderBytes;
     }
 
