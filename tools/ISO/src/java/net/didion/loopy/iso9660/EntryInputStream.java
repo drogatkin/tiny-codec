@@ -69,9 +69,9 @@ class EntryInputStream extends InputStream {
         return len;
     }
     
-    public long seek(long position) {
+    public long seek(long position) throws IOException {
     	if (position < 0)
-    		position = 0;
+    		throw new IOException("Seek value less than zero: "+position);
     	else if (position > pos+rem)
     		position = pos+rem;
     	long adj = position - pos;
