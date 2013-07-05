@@ -10,7 +10,7 @@
       <!ENTITY domain "drogatkin">  <!-- change if differs -->
       <!ENTITY resources "&domain;.&project;.resources">
       <!ENTITY manifestf ""> <!-- type relative path to manifest -->
-      <!ENTITY main_class "&domain;.util.mediaio.Main">  <!-- type main class for run -->
+      <!ENTITY main_class "&domain;.util.mediaio.FlacExplorer">  <!-- type main class for run -->
       ]>
 <!-- $Id: bee.xml,v 1.21 2012/04/17 22:52:48 dmitriy Exp $
    make file used for "generic" project

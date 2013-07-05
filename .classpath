@@ -6,5 +6,6 @@
 	<classpathentry kind="src" path="codecs/JustTags/src/java"/>
 	<classpathentry kind="src" path="codecs/ALAC/src/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/home/dmitriy/projects/JustFLAC/lib/jflac.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
