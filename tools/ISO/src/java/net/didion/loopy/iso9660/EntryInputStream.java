@@ -20,6 +20,7 @@ class EntryInputStream extends InputStream {
         this.isoFile = file;
     }
 
+    @Override
     public int read(byte b[], int off, int len) throws IOException {
         if (this.rem == 0) {
             return -1;
@@ -50,6 +51,7 @@ class EntryInputStream extends InputStream {
         return len;
     }
 
+    @Override
     public int read() throws IOException {
         byte[] b = new byte[1];
         if (read(b, 0, 1) == 1) {
@@ -59,6 +61,7 @@ class EntryInputStream extends InputStream {
         }
     }
 
+    @Override
     public long skip(long n) {
         int len = n > rem ? rem : (int) n;
         this.pos += len;
@@ -83,11 +86,12 @@ class EntryInputStream extends InputStream {
     public int available() {
         return this.rem;
     }
-
+    
     public int size() {
         return this.entry.getSize();
     }
 
+   @Override
    public void close() {
        this.rem = 0;
        this.entry = null;
