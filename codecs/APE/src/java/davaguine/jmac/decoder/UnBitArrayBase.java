@@ -24,6 +24,7 @@ import davaguine.jmac.tools.File;
 import davaguine.jmac.tools.JMACException;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Author: Dmitry Vaguine
@@ -33,7 +34,7 @@ import java.io.IOException;
 public class UnBitArrayBase {
 
     private final static long POWERS_OF_TWO_MINUS_ONE[] = {0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383, 32767, 65535, 131071, 262143, 524287, 1048575, 2097151, 4194303, 8388607, 16777215, 33554431, 67108863, 134217727, 268435455, 536870911, 1073741823, 2147483647, 4294967295L};
-
+protected int m_nGoodBytes;
     //construction/destruction
     public UnBitArrayBase() {
     }
@@ -42,23 +43,18 @@ public class UnBitArrayBase {
     public void FillBitArray() throws IOException {
         //get the bit array index
         long nBitArrayIndex = m_nCurrentBitIndex >> 5;
-        long al[];
-        int j;
 
         //move the remaining data to the front
-        System.arraycopy(al = m_pBitArray, j = (int) nBitArrayIndex, al, 0, (int) (al.length - nBitArrayIndex));
-
+        System.arraycopy(m_pBitArray, (int)nBitArrayIndex, m_pBitArray, 0, (int) (m_pBitArray.length - nBitArrayIndex));
         //read the new data
-        ByteArrayReader reader = m_pReader;
-        reader.reset(m_pIO, j << 2);
-        long l1;
-        int i = (int) ((l1 = m_nElements) - nBitArrayIndex);
-        if ((long) i < l1)
-            do {
-                al[i] = reader.readUnsignedInt();
-                i++;
-            } while ((long) i < l1);
-
+        
+        m_pReader.reset(m_pIO, (int)(nBitArrayIndex << 2));
+        int l1;
+        int i = m_pBitArray.length - (int)nBitArrayIndex;
+        	while (i < m_pBitArray.length){
+            	m_pBitArray[i++] = m_pReader.readUnsignedInt();
+            }
+       
         //adjust the m_Bit pointer
         m_nCurrentBitIndex &= 31;
     }

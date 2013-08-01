@@ -491,6 +491,10 @@ public class APEDecompress extends IAPEDecompress {
 				switch (m_wfeInput.nChannels) {
 				case 2:
 					if ((m_nSpecialCodes & (SpecialFrame.SPECIAL_FRAME_ANY)) > 0) {
+						if((m_nSpecialCodes & SpecialFrame.SPECIAL_FRAME_LEFT_SILENCE) > 0 &&
+                        (m_nSpecialCodes & SpecialFrame.SPECIAL_FRAME_RIGHT_SILENCE) > 0) {
+                        	X = 0;
+                        } else
 						if ((m_nSpecialCodes & SpecialFrame.SPECIAL_FRAME_PSEUDO_STEREO) > 0)
 							X = m_spNewPredictorX.DecompressValue(m_spUnBitArray.DecodeValueRange(m_BitArrayStateX));
 					} else {
@@ -533,7 +537,6 @@ public class APEDecompress extends IAPEDecompress {
 						samples[sampleIndex++] = L;
 						m_nCRC.append(R, L);
 						break;
-
 					}
 					break;
 				case 1:

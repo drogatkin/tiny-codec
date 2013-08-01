@@ -20,6 +20,7 @@
 package davaguine.jmac.decoder;
 
 import davaguine.jmac.tools.File;
+import davaguine.jmac.encoder.BitArray;
 
 import java.io.IOException;
 
@@ -30,10 +31,10 @@ import java.io.IOException;
  */
 public class UnBitArray extends UnBitArrayBase {
     private final static long RANGE_TOTAL_1[] = {0, 14824, 28224, 39348, 47855, 53994, 58171, 60926, 62682, 63786, 64463, 64878, 65126, 65276, 65365, 65419, 65450, 65469, 65480, 65487, 65491, 65493, 65494, 65495, 65496, 65497, 65498, 65499, 65500, 65501, 65502, 65503, 65504, 65505, 65506, 65507, 65508, 65509, 65510, 65511, 65512, 65513, 65514, 65515, 65516, 65517, 65518, 65519, 65520, 65521, 65522, 65523, 65524, 65525, 65526, 65527, 65528, 65529, 65530, 65531, 65532, 65533, 65534, 65535, 65536};
-    private final static long RANGE_WIDTH_1[] = {14824, 13400, 11124, 8507, 6139, 4177, 2755, 1756, 1104, 677, 415, 248, 150, 89, 54, 31, 19, 11, 7, 4, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    private final static long RANGE_WIDTH_1[] = {14824, 13400, 11124, 8507, 6139, 4177, 2755, 1756, 1104, 677, 415, 248, 150, 89, 54, 31, 19, 11, 7, 4, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 
     private final static long RANGE_TOTAL_2[] = {0, 19578, 36160, 48417, 56323, 60899, 63265, 64435, 64971, 65232, 65351, 65416, 65447, 65466, 65476, 65482, 65485, 65488, 65490, 65491, 65492, 65493, 65494, 65495, 65496, 65497, 65498, 65499, 65500, 65501, 65502, 65503, 65504, 65505, 65506, 65507, 65508, 65509, 65510, 65511, 65512, 65513, 65514, 65515, 65516, 65517, 65518, 65519, 65520, 65521, 65522, 65523, 65524, 65525, 65526, 65527, 65528, 65529, 65530, 65531, 65532, 65533, 65534, 65535, 65536};
-    private final static long RANGE_WIDTH_2[] = {19578, 16582, 12257, 7906, 4576, 2366, 1170, 536, 261, 119, 65, 31, 19, 10, 6, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    private final static long RANGE_WIDTH_2[] = {19578, 16582, 12257, 7906, 4576, 2366, 1170, 536, 261, 119, 65, 31, 19, 10, 6, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 
     private final static long K_SUM_MIN_BOUNDARY[] = {0, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824, 2147483648L, 0, 0, 0, 0};
 
@@ -47,7 +48,9 @@ public class UnBitArray extends UnBitArrayBase {
 
     //construction/destruction
     public UnBitArray(File pIO, int nVersion) {
-        CreateHelper(pIO, 16384, nVersion);
+        CreateHelper(pIO, BitArray.BIT_ARRAY_BYTES, nVersion);
+       // System.err.printf("RANGE_TOTAL_1 %d RANGE_WIDTH_1 %d RANGE_TOTAL_2 %d RANGE_WIDTH_2 %d%n", RANGE_TOTAL_1.length, RANGE_WIDTH_1.length,
+        //		RANGE_TOTAL_2.length, RANGE_WIDTH_2.length);
     }
 
     public long DecodeValue(int DecodeMethod, int nParam1, int nParam2) throws IOException {
@@ -84,12 +87,15 @@ public class UnBitArray extends UnBitArrayBase {
                 int nRangeTotal = RangeDecodeFast(RANGE_OVERFLOW_SHIFT);
 
                 // lookup the symbol (must be a faster way than this)
-                long al1[] = RANGE_TOTAL_2;
-                if (nRangeTotal > 65416) {
+                nOverflow = 1;
+                while (nRangeTotal >= RANGE_TOTAL_2[nOverflow])
+                    nOverflow++;
+                nOverflow--;
+                /*if (nRangeTotal > 65416) {
                     int low = 12;
                     nOverflow = 64;
                     int mid = 38;
-                    long midVal = al1[38];
+                    long midVal = RANGE_TOTAL_2[38];
                     do {
                         if (midVal < nRangeTotal)
                             low = mid + 1;
@@ -100,19 +106,18 @@ public class UnBitArray extends UnBitArrayBase {
                             break;
                         }
                         mid = (low + nOverflow) >> 1;
-                        midVal = al1[mid];
+                        midVal = RANGE_TOTAL_2[mid];
                     } while (low <= nOverflow);
                 } else {
                     nOverflow = 1;
-                    while (nRangeTotal >= al1[nOverflow])
+                    while (nRangeTotal >= RANGE_TOTAL_2[nOverflow])
                         nOverflow++;
                     nOverflow--;
-                }
+                }*/
 
                 // update
-                RangeCoderStructDecompress range = m_RangeCoderInfo;
-                range.low -= range.range * al1[nOverflow];
-                range.range *= RANGE_WIDTH_2[nOverflow];
+                m_RangeCoderInfo.low -= m_RangeCoderInfo.range * RANGE_TOTAL_2[nOverflow];
+                m_RangeCoderInfo.range *= RANGE_WIDTH_2[nOverflow];
 
                 // get the working k
                 if (nOverflow == (MODEL_ELEMENTS - 1)) {
@@ -137,10 +142,17 @@ public class UnBitArray extends UnBitArrayBase {
 
                     RangeCoderStructDecompress range = m_RangeCoderInfo;
                     while (range.range <= BOTTOM_VALUE) {
+                    	long decodeByte = ((m_pBitArray[(int) (m_nCurrentBitIndex >> 5)] >> (24 - (m_nCurrentBitIndex & 31))) & 0xFF);
+                        m_nCurrentBitIndex += 8; 
+                        m_RangeCoderInfo.buffer = (m_RangeCoderInfo.buffer << 8) | decodeByte;
+                        m_RangeCoderInfo.low = (m_RangeCoderInfo.low << 8) | ((m_RangeCoderInfo.buffer >> 1) & 0xFF);
+                        m_RangeCoderInfo.range <<= 8;
+     	
+                    	/*
                         range.buffer = (range.buffer << 8) | ((m_pBitArray[(int) (m_nCurrentBitIndex >> 5)] >> (24 - (m_nCurrentBitIndex & 31))) & 0xFF);
                         m_nCurrentBitIndex += 8;
                         range.low = (range.low << 8) | ((range.buffer >> 1) & 0xFF);
-                        range.range <<= 8;
+                        range.range <<= 8;*/
                     }
                     range.range = range.range / nPivotValueA;
                     int nBaseA = (int) (range.low / range.range);
@@ -157,19 +169,25 @@ public class UnBitArray extends UnBitArrayBase {
                     range.low -= range.range * nBaseB;
 
                     nBase = nBaseA * nSplitFactor + nBaseB;
-                } else {
-                    RangeCoderStructDecompress range = m_RangeCoderInfo;
-                    while (range.range <= BOTTOM_VALUE) {
-                        range.buffer = (range.buffer << 8) | ((m_pBitArray[(int) (m_nCurrentBitIndex >> 5)] >> (24 - (m_nCurrentBitIndex & 31))) & 0xFF);
+                } else {                    
+                    while (m_RangeCoderInfo.range <= BOTTOM_VALUE) {
+                    	//if ((m_nCurrentBitIndex / 8) >= m_nGoodBytes)
+                    	//throw new RuntimeException("Over read");
+                    	long decodeByte = ((m_pBitArray[(int) (m_nCurrentBitIndex >> 5)] >> (24 - (m_nCurrentBitIndex & 31))) & 0xFF);
+                        m_nCurrentBitIndex += 8; 
+                        m_RangeCoderInfo.buffer = (m_RangeCoderInfo.buffer << 8) | decodeByte;
+                        m_RangeCoderInfo.low = (m_RangeCoderInfo.low << 8) | ((m_RangeCoderInfo.buffer >> 1) & 0xFF);
+                        m_RangeCoderInfo.range <<= 8;
+                    	
+                        /*range.buffer = (range.buffer << 8) | ((m_pBitArray[(int) (m_nCurrentBitIndex >> 5)] >> (24 - (m_nCurrentBitIndex & 31))) & 0xFF);
                         m_nCurrentBitIndex += 8;
                         range.low = (range.low << 8) | ((range.buffer >> 1) & 0xFF);
-                        range.range <<= 8;
+                        range.range <<= 8;*/
                     }
-
                     // decode
-                    range.range = range.range / nPivotValue;
-                    int nBaseLower = (int) (range.low / range.range);
-                    range.low -= range.range * nBaseLower;
+                    m_RangeCoderInfo.range = m_RangeCoderInfo.range / nPivotValue;
+                    int nBaseLower = (int) (m_RangeCoderInfo.low / m_RangeCoderInfo.range);
+                    m_RangeCoderInfo.low -= m_RangeCoderInfo.range * nBaseLower;
 
                     nBase = nBaseLower;
                 }
@@ -182,13 +200,13 @@ public class UnBitArray extends UnBitArrayBase {
             int nRangeTotal = RangeDecodeFast(RANGE_OVERFLOW_SHIFT);
 
             // lookup the symbol (must be a faster way than this)
-            long al1[] = RANGE_TOTAL_1;
+            
             int nOverflow;
             if (nRangeTotal > 64878) {
                 int low = 12;
                 nOverflow = 64;
                 int mid = 38;
-                long midVal = al1[38];
+                long midVal = RANGE_TOTAL_1[38];
                 do {
                     if (midVal < nRangeTotal)
                         low = mid + 1;
@@ -199,18 +217,18 @@ public class UnBitArray extends UnBitArrayBase {
                         break;
                     }
                     mid = (low + nOverflow) >> 1;
-                    midVal = al1[mid];
+                    midVal = RANGE_TOTAL_1[mid];
                 } while (low <= nOverflow);
             } else {
                 nOverflow = 1;
-                while (nRangeTotal >= al1[nOverflow])
+                while (nRangeTotal >= RANGE_TOTAL_1[nOverflow])
                     nOverflow++;
                 nOverflow--;
             }
 
             // update
             RangeCoderStructDecompress range = m_RangeCoderInfo;
-            range.low -= range.range * al1[nOverflow];
+            range.low -= range.range * RANGE_TOTAL_1[nOverflow];
             range.range *= RANGE_WIDTH_1[nOverflow];
 
             // get the working k
@@ -300,6 +318,21 @@ public class UnBitArray extends UnBitArrayBase {
 
     //functions
     private final int RangeDecodeFast(int nShift) {
+    	 while (m_RangeCoderInfo.range <= BOTTOM_VALUE)
+    	    {   
+    		 int nByte = (int) ((m_pBitArray[(int) (m_nCurrentBitIndex >> 5)] >> (24 - (m_nCurrentBitIndex & 31))) & 0xFF);
+    		    m_nCurrentBitIndex += 8;
+    		    
+    	        m_RangeCoderInfo.buffer = (m_RangeCoderInfo.buffer << 8) | nByte;
+    	        m_RangeCoderInfo.low = (m_RangeCoderInfo.low << 8) | ((m_RangeCoderInfo.buffer >> 1) & 0xFF);
+    	        m_RangeCoderInfo.range <<= 8;
+    	    }
+
+    	    // decode
+    	    m_RangeCoderInfo.range = m_RangeCoderInfo.range >> nShift;
+    	    
+    	    return (int) (m_RangeCoderInfo.low / m_RangeCoderInfo.range);
+    	 /*
         RangeCoderStructDecompress struct = m_RangeCoderInfo;
         long a1[] = m_pBitArray;
         long i = m_nCurrentBitIndex;
@@ -319,7 +352,7 @@ public class UnBitArray extends UnBitArrayBase {
         // decode
         range >>= nShift;
         struct.range = range;
-        return (int) (low / range);
+        return (int) (low / range);*/
     }
 
     private final int RangeDecodeFastWithUpdate(int nShift) {

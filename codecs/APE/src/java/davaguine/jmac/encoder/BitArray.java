@@ -32,24 +32,24 @@ import java.util.Arrays;
  * Time: 16:41:39
  */
 public class BitArray {
-    private final static int BIT_ARRAY_ELEMENTS = 4096;						// the number of elements in the bit array (4 MB)
-    private final static int BIT_ARRAY_BYTES = BIT_ARRAY_ELEMENTS * 4;  	// the number of bytes in the bit array
-    private final static int BIT_ARRAY_BITS = BIT_ARRAY_BYTES * 8;	// the number of bits in the bit array
-    private final static int MAX_ELEMENT_BITS = 128;
-    private final static int REFILL_BIT_THRESHOLD = BIT_ARRAY_BITS - MAX_ELEMENT_BITS;
+    public final static int BIT_ARRAY_ELEMENTS = 4096;// the number of elements in the bit array (4 MB)
+    public final static int BIT_ARRAY_BYTES = BIT_ARRAY_ELEMENTS * 4;  	// the number of bytes in the bit array
+    public final static int BIT_ARRAY_BITS = BIT_ARRAY_BYTES * 8;	// the number of bits in the bit array
+    final static int MAX_ELEMENT_BITS = 128;
+    final static int REFILL_BIT_THRESHOLD = BIT_ARRAY_BITS - MAX_ELEMENT_BITS;
 
-    private final static long CODE_BITS = 32;
-    private final static long TOP_VALUE = (((long) 1) << (CODE_BITS - 1));
-    private final static long SHIFT_BITS = (CODE_BITS - 9);
-    private final static long BOTTOM_VALUE = (TOP_VALUE >> 8);
+    final static long CODE_BITS = 32;
+    final static long TOP_VALUE = (((long) 1) << (CODE_BITS - 1));
+    final static long SHIFT_BITS = (CODE_BITS - 9);
+    final static long BOTTOM_VALUE = (TOP_VALUE >> 8);
 
-    private final static long[] K_SUM_MIN_BOUNDARY = {0, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824, 2147483648L, 0, 0, 0, 0};
+    final static long[] K_SUM_MIN_BOUNDARY = {0, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824, 2147483648L, 0, 0, 0, 0};
 
-    private final static long[] RANGE_TOTAL = {0, 19578, 36160, 48417, 56323, 60899, 63265, 64435, 64971, 65232, 65351, 65416, 65447, 65466, 65476, 65482, 65485, 65488, 65490, 65491, 65492, 65493, 65494, 65495, 65496, 65497, 65498, 65499, 65500, 65501, 65502, 65503, 65504, 65505, 65506, 65507, 65508, 65509, 65510, 65511, 65512, 65513, 65514, 65515, 65516, 65517, 65518, 65519, 65520, 65521, 65522, 65523, 65524, 65525, 65526, 65527, 65528, 65529, 65530, 65531, 65532, 65533, 65534, 65535};
-    private final static long[] RANGE_WIDTH = {19578, 16582, 12257, 7906, 4576, 2366, 1170, 536, 261, 119, 65, 31, 19, 10, 6, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    final static long[] RANGE_TOTAL = {0, 19578, 36160, 48417, 56323, 60899, 63265, 64435, 64971, 65232, 65351, 65416, 65447, 65466, 65476, 65482, 65485, 65488, 65490, 65491, 65492, 65493, 65494, 65495, 65496, 65497, 65498, 65499, 65500, 65501, 65502, 65503, 65504, 65505, 65506, 65507, 65508, 65509, 65510, 65511, 65512, 65513, 65514, 65515, 65516, 65517, 65518, 65519, 65520, 65521, 65522, 65523, 65524, 65525, 65526, 65527, 65528, 65529, 65530, 65531, 65532, 65533, 65534, 65535};
+    final static long[] RANGE_WIDTH = {19578, 16582, 12257, 7906, 4576, 2366, 1170, 536, 261, 119, 65, 31, 19, 10, 6, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-    private final static int MODEL_ELEMENTS = 64;
-    private final static int RANGE_OVERFLOW_SHIFT = 16;
+    final static int MODEL_ELEMENTS = 64;
+    final static int RANGE_OVERFLOW_SHIFT = 16;
 
     // construction / destruction
     public BitArray(File pIO) {
