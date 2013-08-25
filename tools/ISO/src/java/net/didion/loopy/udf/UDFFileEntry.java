@@ -25,7 +25,7 @@ public class UDFFileEntry extends AbstractBlockFileEntry {
         return false;
     }
 
-    public int getSize() {
+    public long getSize() {
         return 0;
     }
 }

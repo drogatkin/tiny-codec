@@ -12,7 +12,7 @@ public final class ISO9660FileEntry extends AbstractBlockFileEntry {
     public final int entryLength;
     public final int extAttributeLength;
     public final long dataLocation;
-    public final int dataLength;
+    public final long dataLength;
     public final int fileUnitSize;
     public final int interleaveSize;
     public final long lastModifiedTime;
@@ -37,7 +37,7 @@ public final class ISO9660FileEntry extends AbstractBlockFileEntry {
         this.entryLength = Util.getUInt8(buff, offset+1);
         this.extAttributeLength = Util.getUInt8(buff, offset+2);
         this.dataLocation = Util.getUInt32LE(buff, offset+3);
-        this.dataLength = (int)Util.getUInt32LE(buff, offset+11);
+        this.dataLength = Util.getUInt32LE(buff, offset+11);
         this.lastModifiedTime = Util.getIntDate(buff, offset+19);
         this.flags = Util.getUInt8(buff, offset + 26);
         this.fileUnitSize = Util.getUInt8(buff, offset+27);
@@ -96,7 +96,7 @@ public final class ISO9660FileEntry extends AbstractBlockFileEntry {
         return (this.flags & 0x03) != 0;
     }
 
-    public int getSize() {
+    public long getSize() {
         return this.dataLength;
     }
 
@@ -112,7 +112,7 @@ public final class ISO9660FileEntry extends AbstractBlockFileEntry {
         return this.encoding;
     }
 
-    public int getEntryLength() {
+    public long getEntryLength() {
         return this.entryLength;
     }
 

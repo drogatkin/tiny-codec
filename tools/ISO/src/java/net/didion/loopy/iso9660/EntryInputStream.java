@@ -7,9 +7,9 @@ class EntryInputStream extends InputStream {
     // entry within the IsoFile
     private ISO9660FileEntry entry;
     // current position within entry data
-    private int pos;
+    private long pos;
     // number of remaining bytes within entry
-    private int rem;
+    private long rem;
     // the source IsoFile
     private ISO9660FileSystem isoFile;
 
@@ -29,7 +29,7 @@ class EntryInputStream extends InputStream {
             return 0;
         }
         if (len > this.rem) {
-            len = this.rem;
+            len = (int) this.rem;
         }
 
         synchronized (this.isoFile) {
@@ -63,7 +63,7 @@ class EntryInputStream extends InputStream {
 
     @Override
     public long skip(long n) {
-        int len = n > rem ? rem : (int) n;
+        long len = n > rem ? rem :  n;
         this.pos += len;
         this.rem -= len;
         if (this.rem == 0) {
@@ -83,11 +83,14 @@ class EntryInputStream extends InputStream {
     	return pos;
     }
 
+    @Override
     public int available() {
-        return this.rem;
+    	if (this.rem > Integer.MAX_VALUE)
+    		return Integer.MAX_VALUE;
+        return (int)this.rem;
     }
     
-    public int size() {
+    public long size() {
         return this.entry.getSize();
     }
 

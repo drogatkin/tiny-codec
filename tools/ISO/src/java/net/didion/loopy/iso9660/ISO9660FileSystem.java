@@ -29,15 +29,18 @@ public class ISO9660FileSystem extends AbstractBlockFileSystem implements Consta
     }
 
     byte[] readData(ISO9660FileEntry entry) throws IOException {
-        int size = entry.getSize();
-        byte[] buf = new byte[size];
-        readData(entry, 0, buf, 0, size);
+        long size = entry.getSize();
+        if (size > Integer.MAX_VALUE)
+        	throw new IOException("Size of entryy "+size+" exceeds system limitation for this operation");
+        int bufSize = (int)size;
+        byte[] buf = new byte[bufSize];
+        readData(entry, 0, buf, 0, bufSize);
         return buf;
     }
 
     int readData(
             ISO9660FileEntry entry,
-            int entryOffset,
+            long entryOffset,
             byte[] buffer,
             int bufferOffset,
             int len)

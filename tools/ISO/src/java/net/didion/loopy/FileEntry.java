@@ -30,5 +30,5 @@ public interface FileEntry {
      * Get the size, in bytes, of the data represented by this entry.
      * @return the entry size
      */
-    int getSize();
+    long getSize();
 }
