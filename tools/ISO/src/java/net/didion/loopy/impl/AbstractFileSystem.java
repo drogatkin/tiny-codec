@@ -28,6 +28,8 @@ public abstract class AbstractFileSystem implements FileSystem {
     private boolean buggyAndroid;
     
     private byte[] oneMegBuff; // can be static but need sync for creation
+    
+    private long currentPos;
 
     protected AbstractFileSystem(File file, boolean readOnly) throws LoopyException {
         if (!readOnly) {
@@ -95,7 +97,8 @@ public abstract class AbstractFileSystem implements FileSystem {
 	protected void seek(long pos) throws IOException {
 		ensureOpen();
 		if (buggyAndroid && pos > Integer.MAX_VALUE) {
-
+			if (currentPos == pos)
+				return;
 			this.channel.seek(Integer.MAX_VALUE);
 			int n = (int) (pos - Integer.MAX_VALUE);
 			synchronized (this) {
@@ -108,11 +111,16 @@ public abstract class AbstractFileSystem implements FileSystem {
 				this.channel.read();
 		} else
 			this.channel.seek(pos);
-
+		currentPos = pos;
 	}
 
     protected int read(byte[] buffer, int bufferOffset, int len) throws IOException {
         ensureOpen();
+        if (buggyAndroid) {
+        	int result = this.channel.read(buffer, bufferOffset, len);
+        	currentPos +=result;
+        	return result;
+        }
         return this.channel.read(buffer, bufferOffset, len);
     }
 }
