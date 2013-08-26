@@ -22,6 +22,12 @@ public abstract class AbstractFileSystem implements FileSystem {
      * Channel to the open file.
      */
     private RandomAccessFile channel;
+    
+    protected long originalSize;
+    
+    private boolean buggyAndroid;
+    
+    private byte[] oneMegBuff; // can be static but need sync for creation
 
     protected AbstractFileSystem(File file, boolean readOnly) throws LoopyException {
         if (!readOnly) {
@@ -38,12 +44,24 @@ public abstract class AbstractFileSystem implements FileSystem {
         } catch (IOException ex) {
             throw new LoopyException("Error opening the file", ex);
         }
+        buggyAndroid = checkForBuggyAndroid();
     }
 
-    private void checkFile() throws FileNotFoundException {
+	private boolean checkForBuggyAndroid() {
+		try {
+			return Class.forName("android.os.Build$VERSION").getField("SDK_INT").getInt(null) < 11;
+			//Class.forName("android.os.Build$VERSION_CODES").getField("HONEYCOMB").getInt(null);
+		} catch (Exception e) {
+
+		}
+		return false;
+	}
+
+	private void checkFile() throws FileNotFoundException {
         if (this.readOnly && !file.exists()) {
             throw new FileNotFoundException("File does not exist: " + this.file);
         }
+        originalSize = file.exists()?file.length():0;
     }
 
     private String getMode(boolean readOnly) {
@@ -74,10 +92,24 @@ public abstract class AbstractFileSystem implements FileSystem {
         }
     }
 
-    protected void seek(long pos) throws IOException {
-        ensureOpen();
-        this.channel.seek(pos);
-    }
+	protected void seek(long pos) throws IOException {
+		ensureOpen();
+		if (buggyAndroid && pos > Integer.MAX_VALUE) {
+
+			this.channel.seek(Integer.MAX_VALUE);
+			int n = (int) (pos - Integer.MAX_VALUE);
+			synchronized (this) {
+				if (oneMegBuff == null)
+					oneMegBuff = new byte[1024 * 1024];
+			}
+			for (int i = 0, k = n / 1024 / 1024; i < k; i++)
+				this.channel.read(oneMegBuff);
+			for (int i = 0, k = n % (1024 * 1024); i < k; i++)
+				this.channel.read();
+		} else
+			this.channel.seek(pos);
+
+	}
 
     protected int read(byte[] buffer, int bufferOffset, int len) throws IOException {
         ensureOpen();
