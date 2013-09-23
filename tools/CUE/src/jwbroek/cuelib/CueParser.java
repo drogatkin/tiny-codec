@@ -116,7 +116,7 @@ final public class CueParser
   private final static Pattern PATTERN_REM_COMMENT            = Pattern.compile
     ("^(REM\\s+COMMENT)\\s+((?:\"[^\"]*\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_REM_DATE               = Pattern.compile
-    ("^(REM\\s+DATE)\\s+(\\d+)\\s*$", Pattern.CASE_INSENSITIVE);
+    ("^(REM\\s+DATE)\\s+\"?(\\d+)\"?\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_REM_DISCID             = Pattern.compile
     ("^(REM\\s+DISCID)\\s+((?:\"[^\"]*\")|\\S+)\\s*$", Pattern.CASE_INSENSITIVE);
   private final static Pattern PATTERN_REM_GENRE              = Pattern.compile
