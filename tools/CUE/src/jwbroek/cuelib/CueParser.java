@@ -41,6 +41,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jwbroek.io.FileSelector;
+import jwbroek.util.CharsetUtil;
 import jwbroek.util.LogUtil;
 
 /**
@@ -224,7 +225,11 @@ final public class CueParser
 			} finally {
 				inputStream.close();
 			}
-			is = new ByteArrayInputStream(os.toByteArray());
+			byte[] cueBytes = os.toByteArray();
+			// TODO need some option charset auto detect
+			if (CharsetUtil.matchUTF8(cueBytes))
+				encoding = "UTF-8";
+			is = new ByteArrayInputStream(cueBytes);
 		}
 		byte[] marker = new byte[2];
 		is.mark(4);
