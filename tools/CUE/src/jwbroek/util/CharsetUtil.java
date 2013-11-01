@@ -23,7 +23,9 @@ public class CharsetUtil {
 				if ((++i == chars.length) || ((chars[i] & 0xC0) != 0x80))
 					return false;
 			}
+			if (n > 0)
+				return true;
 		}
-		return true;
+		return false;
 	}
 }
