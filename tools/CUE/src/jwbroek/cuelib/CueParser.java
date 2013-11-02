@@ -215,6 +215,7 @@ final public class CueParser
    EF BB BF 	UTF-8
    */
 		InputStream is = inputStream;
+		byte[] cueBytes = null;
 		if (inputStream.markSupported() == false) {
 			ByteArrayOutputStream os = new ByteArrayOutputStream(1024);
 			byte[] buf = new byte[512];
@@ -225,10 +226,7 @@ final public class CueParser
 			} finally {
 				inputStream.close();
 			}
-			byte[] cueBytes = os.toByteArray();
-			// TODO need some option charset auto detect
-			if (CharsetUtil.matchUTF8(cueBytes))
-				encoding = "UTF-8";
+			cueBytes = os.toByteArray();
 			is = new ByteArrayInputStream(cueBytes);
 		}
 		byte[] marker = new byte[2];
@@ -245,8 +243,12 @@ final public class CueParser
 				encoding = "UTF-16LE";
 			else if ((marker[0] & 255) == 0xfe && (marker[1] & 255) == 0xff)
 				encoding = "UTF-16BE";
-			else
+			else {
 				is.reset();
+				// TODO need some option charset auto detect
+				if (cueBytes != null && CharsetUtil.matchUTF8(cueBytes))
+					encoding = "UTF-8";
+			}
 		} else
 			is.reset();
 
