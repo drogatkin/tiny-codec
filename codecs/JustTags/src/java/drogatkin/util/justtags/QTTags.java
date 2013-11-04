@@ -402,6 +402,11 @@ public class QTTags implements TagNames {
 		return atom;
 	}
 
+	/*@Override
+	public String toString() {
+		return file.getName();
+	}*/
+
 	protected void readAtomFolder(FileChannel channel, long size, int signature, HashMap<String, Object> tagsTarget)
 			throws IOException {
 		AtomHeader atom = null;

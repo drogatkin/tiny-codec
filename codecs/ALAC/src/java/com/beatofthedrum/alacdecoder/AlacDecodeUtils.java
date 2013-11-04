@@ -550,13 +550,16 @@ class AlacDecodeUtils
 					right = right | (uncompressed_bytes_buffer_b[i] & mask);
 				}
 
+				buffer_out[i *numchannels] = left;
+				buffer_out[i *numchannels + 1] = right;
+				/*
 				buffer_out[i * numchannels * 3] = (left & 0xFF);
 				buffer_out[i * numchannels * 3 + 1] = ((left >> 8) & 0xFF);
 				buffer_out[i * numchannels * 3 + 2] = ((left >> 16) & 0xFF);
 
 				buffer_out[i * numchannels * 3 + 3] = (right & 0xFF);
 				buffer_out[i * numchannels * 3 + 4] = ((right >> 8) & 0xFF);
-				buffer_out[i * numchannels * 3 + 5] = ((right >> 16) & 0xFF);
+				buffer_out[i * numchannels * 3 + 5] = ((right >> 16) & 0xFF);*/
 			}
 
 			return;
@@ -580,14 +583,17 @@ class AlacDecodeUtils
 				left = left | (uncompressed_bytes_buffer_a[i] & mask);
 				right = right | (uncompressed_bytes_buffer_b[i] & mask);
 			}
-
+			
+			buffer_out[i *numchannels] = left;
+			buffer_out[i *numchannels + 1] = right;
+			/*
 			buffer_out[i * numchannels * 3] = (left & 0xFF);
 			buffer_out[i * numchannels * 3 + 1] = ((left >> 8) & 0xFF);
 			buffer_out[i * numchannels * 3 + 2] = ((left >> 16) & 0xFF);
 
 			buffer_out[i * numchannels * 3 + 3] = (right & 0xFF);
 			buffer_out[i * numchannels * 3 + 4] = ((right >> 8) & 0xFF);
-			buffer_out[i * numchannels * 3 + 5] = ((right >> 16) & 0xFF);
+			buffer_out[i * numchannels * 3 + 5] = ((right >> 16) & 0xFF);*/
 
 		}
 
@@ -774,21 +780,23 @@ class AlacDecodeUtils
 						mask = ~(0xFFFFFFFF << (uncompressed_bytes * 8));
 						sample = sample | (alac.uncompressed_bytes_buffer_a[i] & mask);
 					}
-
+					outbuffer[i * alac.numchannels] = sample;
+					/*
 					outbuffer[i * alac.numchannels * 3] = ((sample) & 0xFF);
 					outbuffer[i * alac.numchannels * 3 + 1] = ((sample >> 8) & 0xFF);
 					outbuffer[i * alac.numchannels * 3 + 2] = ((sample >> 16) & 0xFF);
-					
+					*/
 					/*
 					** We have to handle the case where the data is actually mono, but the stsd atom says it has 2 channels
 					** in this case we create a stereo file where one of the channels is silent. If mono and 1 channel this value 
 					** will be overwritten in the next iteration
 					*/
-					
+					outbuffer[(i * alac.numchannels) + 1] = 0;
+					/*
 					outbuffer[i * alac.numchannels * 3 + 3] = 0;
 					outbuffer[i * alac.numchannels * 3 + 4] = 0;
 					outbuffer[i * alac.numchannels * 3 + 5] = 0;
-					
+					*/
 				}
 				break;
 			}

@@ -129,7 +129,7 @@ public class AlacUtils
         int sample_byte_size;
 		SampleDuration sampleinfo = new SampleDuration();
         byte[] read_buffer = ac.read_buffer;
-		int destBufferSize = 1024 *24 * 3; // 24kb buffer = 4096 frames = 1 alac sample (we support max 24bps)
+		int destBufferSize = pDestBuffer.length; // 24kb buffer = 4096 frames = 1 alac sample (we support max 24bps)
 		int outputBytes;
 		MyStream inputStream = new MyStream();
 
@@ -153,9 +153,8 @@ public class AlacUtils
 		StreamUtils.stream_read(inputStream, sample_byte_size, read_buffer, 0);
 		
 		/* now fetch */
-		outputBytes = destBufferSize;
 
-		outputBytes = AlacDecodeUtils.decode_frame(ac.alac, read_buffer, pDestBuffer, outputBytes);
+		outputBytes = AlacDecodeUtils.decode_frame(ac.alac, read_buffer, pDestBuffer, destBufferSize);
 		
 		ac.current_sample_block = ac.current_sample_block + 1;
 		outputBytes -= ac.offset * AlacGetBytesPerSample(ac);
