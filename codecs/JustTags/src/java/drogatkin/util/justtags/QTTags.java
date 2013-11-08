@@ -10,6 +10,8 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 
+import jwbroek.util.CharsetUtil;
+
 /**
  * For support AAC (QuickTime) formats
  */
@@ -289,23 +291,23 @@ public class QTTags implements TagNames {
 			atom.read(4);
 			readAtomFolder(channel, atom.extSize - 8 - 4, atom.signature, tagsTarget);
 		} else if (atom.signature == NAME) {
-			DataHeader data = new DataHeader(charset);
+			DataHeader data = new DataHeader();
 			data.read(channel);
 			tagsTarget.put(TITLE, data.data);
 		} else if (atom.signature == MP4_ARTIST) {
-			DataHeader data = new DataHeader(charset);
+			DataHeader data = new DataHeader();
 			data.read(channel);
 			tagsTarget.put(ARTIST, data.data);
 		} else if (atom.signature == MP4_ALBUM) {
-			DataHeader data = new DataHeader(charset);
+			DataHeader data = new DataHeader();
 			data.read(channel);
 			tagsTarget.put(ALBUM, data.data);
 		} else if (atom.signature == COMMENTARY) {
-			DataHeader data = new DataHeader(charset);
+			DataHeader data = new DataHeader();
 			data.read(channel);
 			tagsTarget.put(COMMENTS, data.data);
 		} else if (atom.signature == MP4_DATE) {
-			DataHeader data = new DataHeader(charset);
+			DataHeader data = new DataHeader();
 			data.read(channel);
 			try {
 				tagsTarget.put(YEAR, new Integer(data.data));
@@ -313,7 +315,7 @@ public class QTTags implements TagNames {
 				///
 			}
 		} else if (atom.signature == GROUPING) {
-			DataHeader data = new DataHeader(charset);
+			DataHeader data = new DataHeader();
 			data.read(channel);
 			tagsTarget.put(CONTENTGROUP, data.data);
 		} else if (atom.signature == TOOL) {
@@ -329,7 +331,7 @@ public class QTTags implements TagNames {
 				tagsTarget.put(GENRE, new Integer(12));
 			data.toNextAtom();
 		} else if (atom.signature == CUSTOM_GENRE) {
-			DataHeader data = new DataHeader(charset);
+			DataHeader data = new DataHeader();
 			data.read(channel);
 			tagsTarget.put(GENRE, data.data);
 		} else if (atom.signature == MP4_TRACK) {
@@ -350,7 +352,7 @@ public class QTTags implements TagNames {
 			tagsTarget.put(PARTOFSET, String.valueOf(d) + '/' + nd);
 			data.toNextAtom();
 		} else if (atom.signature == WRITER) {
-			DataHeader data = new DataHeader(charset);
+			DataHeader data = new DataHeader();
 			data.read(channel);
 			tagsTarget.put(COMPOSER, data.data);
 		} else if (atom.signature == COVERART) {
@@ -385,11 +387,11 @@ public class QTTags implements TagNames {
 			// +")="+(bb.getInt(16)/bb.getInt(12)));
 			atom.toNextAtom();
 		} else if (atom.signature == MP4_ALBUM_ARTIST) {
-			DataHeader data = new DataHeader(charset);
+			DataHeader data = new DataHeader();
 			data.read(channel);
 			tagsTarget.put(ALBUMARTIST, data.data);
 		} else if (atom.signature == MP4_LYRICS) {
-			DataHeader data = new DataHeader(charset);
+			DataHeader data = new DataHeader();
 			data.read(channel);
 			tagsTarget.put(LYRICS, data.data);
 		} else if (atom.signature == MOVIEHEADERAID) {
@@ -512,13 +514,8 @@ public class QTTags implements TagNames {
 	}
 
 	class DataHeader extends AtomHeader {
-		String encoding;
 
 		String data;
-
-		DataHeader(String encoding) {
-			this.encoding = encoding;
-		}
 
 		void read(FileChannel channel) throws IOException {
 			start = channel.position();
@@ -532,9 +529,13 @@ public class QTTags implements TagNames {
 				extSize = size + 4;
 				if (__debug)
 					System.err.printf("Non standard data size %d%n", size);
-				data = Charset.forName(charset == null ? "ISO8859_1" : encoding).decode(read(size)).toString();
+				ByteBuffer bb = read(size);
+				String cs = charset;
+				if (CharsetUtil.matchUTF8(bb.array()))
+					cs = "UTF-8";
+				data = Charset.forName(cs == null ? "ISO8859_1" : cs).decode(bb).toString();
 				if (__debug)
-					System.err.printf("NData: %s%n", data);
+					System.err.printf("NData: %s [%s%n", data, cs);
 			} else {
 				buffer.rewind();
 				size = buffer.getInt();
@@ -549,10 +550,14 @@ public class QTTags implements TagNames {
 				if (signature == DATA) {
 					int num = read(4).getInt();
 					move(4);
-					data = Charset.forName(charset == null ? "ISO8859_1" : encoding).decode(read(size - 8 - 8))
+					ByteBuffer bb = read(size - 8 - 8);
+					String cs = charset;
+					if (CharsetUtil.matchUTF8(bb.array()))
+						cs = "UTF-8";
+					data = Charset.forName(cs == null ? "ISO8859_1" : cs).decode(bb)
 							.toString();
 					if (__debug)
-						System.err.printf("Data: %s%n", data);
+						System.err.printf("Data: %s [%s raw: %s%n", data, cs, new String(bb.array()));
 				} else {
 					System.err.printf("Date header signature 'data' was expected but found %s (size %d)%n",
 							asString(signature), size);
