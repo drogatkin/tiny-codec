@@ -531,8 +531,12 @@ public class QTTags implements TagNames {
 					System.err.printf("Non standard data size %d%n", size);
 				ByteBuffer bb = read(size);
 				String cs = charset;
-				if (CharsetUtil.matchUTF8(bb.array()))
-					cs = "UTF-8";
+				try {
+					if (CharsetUtil.matchUTF8(bb.array()))
+						cs = "UTF-8";
+				} catch (UnsupportedOperationException uoe) {
+				}
+
 				data = Charset.forName(cs == null ? "ISO8859_1" : cs).decode(bb).toString();
 				if (__debug)
 					System.err.printf("NData: %s [%s%n", data, cs);
@@ -552,10 +556,12 @@ public class QTTags implements TagNames {
 					move(4);
 					ByteBuffer bb = read(size - 8 - 8);
 					String cs = charset;
-					if (CharsetUtil.matchUTF8(bb.array()))
-						cs = "UTF-8";
-					data = Charset.forName(cs == null ? "ISO8859_1" : cs).decode(bb)
-							.toString();
+					try {
+						if (CharsetUtil.matchUTF8(bb.array()))
+							cs = "UTF-8";
+					} catch (UnsupportedOperationException uoe) {
+					}
+					data = Charset.forName(cs == null ? "ISO8859_1" : cs).decode(bb).toString();
 					if (__debug)
 						System.err.printf("Data: %s [%s raw: %s%n", data, cs, new String(bb.array()));
 				} else {
