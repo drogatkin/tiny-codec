@@ -148,10 +148,12 @@ public class QTTags implements TagNames {
 
 	File file;
 	String charset;
+	boolean utf;
 
 	public QTTags(File f, String cs) {
 		file = f;
 		charset = cs;
+		utf = "UTF-8".equalsIgnoreCase(charset);
 	}
 
 	public int getType(HashMap<String, Object> tagsTarget) {
@@ -531,11 +533,12 @@ public class QTTags implements TagNames {
 					System.err.printf("Non standard data size %d%n", size);
 				ByteBuffer bb = read(size);
 				String cs = charset;
-				try {
-					if (CharsetUtil.matchUTF8(bb.array()))
-						cs = "UTF-8";
-				} catch (UnsupportedOperationException uoe) {
-				}
+				if (utf == false)
+					try {
+						if (CharsetUtil.matchUTF8(bb.array()))
+							cs = "UTF-8";
+					} catch (UnsupportedOperationException uoe) {
+					}
 
 				data = Charset.forName(cs == null ? "ISO8859_1" : cs).decode(bb).toString();
 				if (__debug)
@@ -556,11 +559,12 @@ public class QTTags implements TagNames {
 					move(4);
 					ByteBuffer bb = read(size - 8 - 8);
 					String cs = charset;
-					try {
-						if (CharsetUtil.matchUTF8(bb.array()))
-							cs = "UTF-8";
-					} catch (UnsupportedOperationException uoe) {
-					}
+					if (utf == false)
+						try {
+							if (CharsetUtil.matchUTF8(bb.array()))
+								cs = "UTF-8";
+						} catch (UnsupportedOperationException uoe) {
+						}
 					data = Charset.forName(cs == null ? "ISO8859_1" : cs).decode(bb).toString();
 					if (__debug)
 						System.err.printf("Data: %s [%s raw: %s%n", data, cs, new String(bb.array()));
