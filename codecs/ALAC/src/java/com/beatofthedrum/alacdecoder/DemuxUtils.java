@@ -341,7 +341,7 @@ class DemuxUtils
 			if (qtmovie.res.codecdata_len > qtmovie.res.codecdata.length)
 				qtmovie.res.codecdata = new int[qtmovie.res.codecdata_len]; // TODO think to make the array static and reused
 			else
-				Arrays.fill(qtmovie.res.codecdata, 0, qtmovie.res.codecdata_len, 0);
+				Arrays.fill(qtmovie.res.codecdata, 3, qtmovie.res.codecdata_len, 0);
 			
 			/* audio format atom */
 			qtmovie.res.codecdata[0] = 0x0c000000;
