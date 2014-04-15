@@ -11,6 +11,8 @@
 
 package com.beatofthedrum.alacdecoder;
 
+import java.util.Arrays;
+
 
 class DemuxUtils
 {
@@ -213,7 +215,6 @@ class DemuxUtils
 		int compsubtype = 0;
 		int size_remaining = chunk_len - 8; // FIXME WRONG
 
-		int strlen;
 
 		/* version */
 		StreamUtils.stream_read_uint8(qtmovie.qtstream);
@@ -239,7 +240,7 @@ class DemuxUtils
 		size_remaining -= 8;
 
 		/* name */
-		strlen = StreamUtils.stream_read_uint8(qtmovie.qtstream);
+		int strlen = StreamUtils.stream_read_uint8(qtmovie.qtstream);
 
 		/* 
 		** rewrote this to handle case where we actually read more than required 
@@ -336,12 +337,12 @@ class DemuxUtils
 
 			/* 12 = audio format atom, 8 = padding */
 			qtmovie.res.codecdata_len = entry_remaining + 12 + 8;
-
-			for (int count = 0; count < qtmovie.res.codecdata_len; count++)
-			{
-				qtmovie.res.codecdata[count] = 0;
-			}
-
+			
+			if (qtmovie.res.codecdata_len > qtmovie.res.codecdata.length)
+				qtmovie.res.codecdata = new int[qtmovie.res.codecdata_len]; // TODO think to make the array static and reused
+			else
+				Arrays.fill(qtmovie.res.codecdata, 0, qtmovie.res.codecdata_len, 0);
+			
 			/* audio format atom */
 			qtmovie.res.codecdata[0] = 0x0c000000;
 			qtmovie.res.codecdata[1] = MakeFourCC(97,109,114,102);		// "amrf" ascii values
