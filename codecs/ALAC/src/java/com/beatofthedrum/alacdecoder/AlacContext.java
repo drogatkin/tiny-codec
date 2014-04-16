@@ -13,7 +13,7 @@ package com.beatofthedrum.alacdecoder;
 
 public class AlacContext
 {
-	DemuxResT demux_res = new DemuxResT();
+	DemuxResT demux_res;
 	AlacFile alac = new AlacFile();
 	AlacInputStream input_stream;
 	int current_sample_block = 0;

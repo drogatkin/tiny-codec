@@ -18,7 +18,6 @@ class DemuxResT
 	public int sample_size;
 	public int sample_rate;
 	public int format;
-	public int[] buf = new int[1024*80];
 
 	public SampleInfo[] time_to_sample = new SampleInfo[16];
 	public int num_time_to_samples;
