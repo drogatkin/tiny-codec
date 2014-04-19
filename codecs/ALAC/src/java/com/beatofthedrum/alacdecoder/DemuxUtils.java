@@ -295,6 +295,8 @@ class DemuxUtils
 
 			entry_size = (StreamUtils.stream_read_uint32(qtmovie.qtstream));
 			qtmovie.res.format = StreamUtils.stream_read_uint32(qtmovie.qtstream);
+			if (MakeFourCC('a', 'l', 'a', 'c') != qtmovie.res.format)
+				return 0; // not ALAC
 			entry_remaining = entry_size;
 			entry_remaining -= 8;
 
