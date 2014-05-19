@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="codecs/APE/src/java"/>
+	<classpathentry kind="src" path="tools/CUE/src"/>
 	<classpathentry kind="src" path="tools/IO/src/java"/>
 	<classpathentry kind="src" path="tools/ISO/src/java"/>
 	<classpathentry kind="src" path="codecs/JustTags/src/java"/>
 	<classpathentry kind="src" path="codecs/ALAC/src/java"/>
+	<classpathentry kind="src" path="tools/ID3V2/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/home/dmitriy/projects/JustFLAC/lib/jflac.jar"/>
 	<classpathentry kind="output" path="bin"/>
