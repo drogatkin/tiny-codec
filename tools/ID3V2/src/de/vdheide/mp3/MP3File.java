@@ -2577,30 +2577,7 @@ public class MP3File extends java.io.File {
      */
     public TagContent getPicture() throws FrameDamagedException
     {
-	byte []v2cont = Frame.read(id3v2, id3v2.getFrameCode(ID3v2.PICTURE));
-	if (v2cont == null)
-			return new TagContent();
-	else {
-	    TagContent ret = new TagContent();
-
-	    Parser parse = new Parser(v2cont, true, encoding);
-	    try {
-			if (id3v2.header.version <= 2) 
-				try {
-				ret.setType(new String(parse.parseBinary(3), ID3.ISO_8859_1));
-				} catch(java.io.UnsupportedEncodingException ue) {
-				}
-			else
-				ret.setType(parse.parseText(TextFrame.ISO));
-		ret.setSubtype(parse.parseBinary(1));
-		ret.setDescription(parse.parseText());
-		ret.setContent(parse.parseBinary());
-		//System.err.println("Image  is: 0x"+rogatkin.BaseController.bytesToHex(ba, 0, 100));
-		return ret;
-	    } catch (ParseException e) {
-		throw new FrameDamagedException();
-	    }
-	}
+    	return id3v2.getPicture();
     }
 
 
