@@ -521,10 +521,10 @@ public class APEDecompress extends IAPEDecompress {
 						int RV = X - (Y / 2);
 						int LV = RV + Y;
 
-						if (RV < 0)
-							RV = (RV + 0x800000) | 0x800000;
-						if (LV < 0)
-							LV = (LV + 0x800000) | 0x800000;
+						//if (RV < 0)
+							//RV = (RV + 0x800000) | 0x800000;
+						//if (LV < 0)
+							//LV = (LV + 0x800000) | 0x800000;
 
 						samples[sampleIndex++] = RV;
 						samples[sampleIndex++] = LV;
@@ -553,8 +553,8 @@ public class APEDecompress extends IAPEDecompress {
 						m_nCRC.append(R);
 						break;
 					case 24:
-						if (X < 0)
-							X = (X + 0x800000) | 0x800000;
+						//if (X < 0)
+							//X = (X + 0x800000) | 0x800000;
 						samples[sampleIndex++] = X;
 						m_nCRC.append24(X);
 						break;
