@@ -85,35 +85,15 @@ public class UnBitArray extends UnBitArrayBase {
             {
                 // decode
                 int nRangeTotal = RangeDecodeFast(RANGE_OVERFLOW_SHIFT);
-
+                //if (nRangeTotal >= RANGE_TOTAL_2[RANGE_TOTAL_2.length - 1])
+                	//throw new IOException("Inconsistent data, value " + nRangeTotal + " of total range is greater than max "
+						//	+ RANGE_TOTAL_2[RANGE_TOTAL_2.length - 1]);
+                	
                 // lookup the symbol (must be a faster way than this)
                 nOverflow = 1;
-                while (nRangeTotal >= RANGE_TOTAL_2[nOverflow])
-                    nOverflow++;
-                nOverflow--;
-                /*if (nRangeTotal > 65416) {
-                    int low = 12;
-                    nOverflow = 64;
-                    int mid = 38;
-                    long midVal = RANGE_TOTAL_2[38];
-                    do {
-                        if (midVal < nRangeTotal)
-                            low = mid + 1;
-                        else if (midVal > nRangeTotal)
-                            nOverflow = mid - 1;
-                        else {
-                            nOverflow = mid;
-                            break;
-                        }
-                        mid = (low + nOverflow) >> 1;
-                        midVal = RANGE_TOTAL_2[mid];
-                    } while (low <= nOverflow);
-                } else {
-                    nOverflow = 1;
-                    while (nRangeTotal >= RANGE_TOTAL_2[nOverflow])
-                        nOverflow++;
-                    nOverflow--;
-                }*/
+				while (nRangeTotal >= RANGE_TOTAL_2[nOverflow])
+					nOverflow++;
+				nOverflow--;
 
                 // update
                 m_RangeCoderInfo.low -= m_RangeCoderInfo.range * RANGE_TOTAL_2[nOverflow];
