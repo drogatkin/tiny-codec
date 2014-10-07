@@ -92,6 +92,7 @@ public class APEInfo {
         // re-initialize variables
         m_APEFileInfo.nSeekTableElements = 0;
         m_bHasFileInformationLoaded = false;
+        m_spIO.close();
     }
 
     public int getApeInfoFileVersion() {
