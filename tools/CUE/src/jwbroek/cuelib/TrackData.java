@@ -114,7 +114,14 @@ public class TrackData
     TrackData.logger.exiting(TrackData.class.getCanonicalName(), "TrackData(FileData,int,String)");
   }
   
-  /**
+  @Override
+	public String toString() {
+		return "TrackData [indices=" + indices + ", flags=" + flags + ", number=" + number + ", dataType=" + dataType
+				+ ", isrcCode=" + isrcCode + ", performer=" + performer + ", title=" + title + ", pregap=" + pregap
+				+ ", postgap=" + postgap + ", songwriter=" + songwriter + "]";
+	}
+
+/**
    * Convenience method for getting metadata from the cue sheet. If a certain metadata field is not set, the method
    * will return the empty string. When a field is ambiguous (such as the track number on a cue sheet instead of on a
    * specific track), an IllegalArgumentException will be thrown. Otherwise, this method will attempt to give a sensible
