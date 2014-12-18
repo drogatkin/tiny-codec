@@ -1,5 +1,5 @@
 package java.awt;
 
-public class Panel {
+public class Panel extends Container {
 
 }
