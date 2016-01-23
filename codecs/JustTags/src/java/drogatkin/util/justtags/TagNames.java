@@ -25,6 +25,7 @@ public interface TagNames {
 	public static final String BPM = "BPM";
 	public static final String FORMAT = "Format";
 	public static final String BITRATE = "Bitrate";
+	public static final String CHANNELS = "Channels";
 	public static final String COMMENTS = "Comments";
 	public static final String CONTENTGROUP = "ContentGroup";
 	public static final String OFTRACKS = "OfTracks";

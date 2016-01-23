@@ -1,5 +1,6 @@
 package net.didion.loopy.impl;
 
+import net.didion.loopy.AccessStream;
 import net.didion.loopy.FileSystem;
 import net.didion.loopy.LoopyException;
 
@@ -21,7 +22,7 @@ public abstract class AbstractFileSystem implements FileSystem {
     /**
      * Channel to the open file.
      */
-    private RandomAccessFile channel;
+    private AccessStream channel;
     
     protected long originalSize;
     
@@ -31,6 +32,16 @@ public abstract class AbstractFileSystem implements FileSystem {
     
     private long currentPos;
 
+	protected AbstractFileSystem(AccessStream as) throws LoopyException {
+		channel = as;
+		readOnly = true;
+		try {
+			originalSize = channel.length();
+		} catch (IOException ex) {
+			throw new LoopyException("Error opening the file:" + channel, ex);
+		}
+	}
+    
     protected AbstractFileSystem(File file, boolean readOnly) throws LoopyException {
         if (!readOnly) {
             throw new IllegalArgumentException(
@@ -42,9 +53,9 @@ public abstract class AbstractFileSystem implements FileSystem {
             // check that the underlying file is valid
             checkFile();
             // open the channel
-            this.channel = new RandomAccessFile(this.file, getMode(readOnly));
+            this.channel = new AcceeStreamImpl(this.file, getMode(readOnly));
         } catch (IOException ex) {
-            throw new LoopyException("Error opening the file", ex);
+            throw new LoopyException("Error opening the file:"+file, ex);
         }
         buggyAndroid = checkForBuggyAndroid();
     }
@@ -122,5 +133,13 @@ public abstract class AbstractFileSystem implements FileSystem {
         	return result;
         }
         return this.channel.read(buffer, bufferOffset, len);
+    }
+    
+    static class AcceeStreamImpl extends RandomAccessFile implements AccessStream {
+
+		public AcceeStreamImpl(File file, String mode) throws FileNotFoundException {
+			super(file, mode);
+		}
+    	
     }
 }

@@ -147,6 +147,7 @@ public class QTTags implements TagNames {
 	private final static boolean __debug = false;
 
 	File file;
+	FileChannel fileChannel;
 	String charset;
 	boolean utf;
 
@@ -156,6 +157,10 @@ public class QTTags implements TagNames {
 		utf = "UTF-8".equalsIgnoreCase(charset);
 	}
 
+	public QTTags(File f, FileChannel fc, String cs) {
+		this(f, cs);
+		fileChannel = fc;
+	}
 	public int getType(HashMap<String, Object> tagsTarget) {
 		return (Integer) tagsTarget.get(FORMAT);
 	}
@@ -215,7 +220,7 @@ public class QTTags implements TagNames {
 
 	public void parse(HashMap<String, Object> tagsTarget) throws IOException {
 		// read atom container header
-		FileChannel channel = new FileInputStream(file).getChannel();
+		FileChannel channel = fileChannel == null?new FileInputStream(file).getChannel():fileChannel;
 		try {
 			while (channel.position() < channel.size())
 				readAtom(channel, tagsTarget);
@@ -284,6 +289,7 @@ public class QTTags implements TagNames {
 					channels = bb.getShort(16);
 					sampleRate = bb.getInt(22);
 					tagsTarget.put(SAMPLERATE, new Integer(sampleRate));
+					tagsTarget.put(CHANNELS, channels);
 				}
 			}
 

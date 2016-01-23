@@ -13,7 +13,7 @@ package com.beatofthedrum.alacdecoder;
 
 class MyStream
 {
-	public java.io.DataInputStream stream;
+	public AlacInputStream stream;
 	public int currentPos = 0;
     public byte[] read_buf = new byte[8];
 }

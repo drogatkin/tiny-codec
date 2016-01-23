@@ -60,7 +60,7 @@ class DemuxUtils
 	}
 
 
-	public static int qtmovie_read(java.io.DataInputStream file, QTMovieT qtmovie, DemuxResT demux_res)
+	public static int qtmovie_read(AlacInputStream file, QTMovieT qtmovie, DemuxResT demux_res)
 	{
 		int found_moov = 0;
 		int found_mdat = 0;

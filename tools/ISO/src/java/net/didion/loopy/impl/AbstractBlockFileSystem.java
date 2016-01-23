@@ -7,10 +7,12 @@
 package net.didion.loopy.impl;
 
 import net.didion.loopy.LoopyException;
+import net.didion.loopy.AccessStream;
 import net.didion.loopy.FileEntry;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.Enumeration;
 
 public abstract class AbstractBlockFileSystem extends AbstractFileSystem {
@@ -18,6 +20,12 @@ public abstract class AbstractBlockFileSystem extends AbstractFileSystem {
     private int reservedBytes;
     private VolumeDescriptor volumeDescriptor;
 
+	protected AbstractBlockFileSystem(AccessStream as, int blockSize, int reservedBytes) throws LoopyException {
+		super(as);
+		this.blockSize = blockSize;
+		this.reservedBytes = reservedBytes;
+	}
+    
     protected AbstractBlockFileSystem(
             File file, boolean readOnly, int blockSize, int reservedBytes)
             throws LoopyException {

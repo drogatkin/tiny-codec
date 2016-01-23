@@ -10,26 +10,35 @@
 */
 package com.beatofthedrum.alacdecoder;
 
+import java.io.IOException;
+
 public class AlacUtils
 {
-    public static AlacContext AlacOpenFileInput(String inputfilename)
+	
+    public static AlacContext AlacOpenFileInput(String inputfilename) {
+    	AlacInputStream input_stream = null;
+    	try
+		{
+    		input_stream = new AlacInputStreamImpl(new java.io.FileInputStream(inputfilename));
+		}
+		catch (java.io.FileNotFoundException fe)
+		{
+			
+		}
+    	return AlacOpenFileInput(input_stream);
+    }
+    
+    public static AlacContext AlacOpenFileInput(AlacInputStream input_stream) 
     {
 		int headerRead;
 		QTMovieT qtmovie = new QTMovieT();
 		DemuxResT demux_res = new DemuxResT();
 		AlacContext ac = new AlacContext();
-		AlacInputStream input_stream;
 		AlacFile alac;
 		
 		ac.error = false;
 		
-		try
-		{
-			java.io.FileInputStream fistream;
-			fistream = new java.io.FileInputStream(inputfilename);
-			input_stream = new AlacInputStream(fistream);
-		}
-		catch (java.io.FileNotFoundException fe)
+		if (input_stream == null)
 		{
 			ac.error_message = "Input file not found";
 			ac.error = true;
@@ -67,7 +76,7 @@ public class AlacUtils
 			
 			try
 			{
-				ac.input_stream.close();
+				ac.input_stream.seek(0);
 			}
 			catch(java.io.IOException ioe)
 			{
@@ -75,24 +84,10 @@ public class AlacUtils
 				ac.error = true;
 				return (ac);
 			}
-			
-			try
-			{
-				java.io.FileInputStream fistream;
-				fistream = new java.io.FileInputStream(inputfilename);
-				input_stream = new AlacInputStream(fistream);
-				ac.input_stream = input_stream;
 				
 				qtmovie.qtstream.stream = input_stream;
 				qtmovie.qtstream.currentPos = 0;
 				StreamUtils.stream_skip(qtmovie.qtstream, qtmovie.saved_mdat_pos);
-			}
-			catch (java.io.FileNotFoundException fe)
-			{
-				ac.error_message = "Input file not found";
-				ac.error = true;
-				return (ac);
-			}
 		}
 		
 		/* initialise the sound converter */
@@ -288,9 +283,10 @@ public class AlacUtils
      * sets position in pcm samples
      * @param ac alac context
      * @param position position in pcm samples to go to
+     * @throws IOException 
      */
 
-    public static void AlacSetPosition(AlacContext ac, long position) {
+    public static void AlacSetPosition(AlacContext ac, long position) throws IOException {
         DemuxResT res = ac.demux_res;
 
         int current_position = 0;
