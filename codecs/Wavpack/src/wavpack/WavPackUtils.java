@@ -53,7 +53,6 @@ public class WavPackUtils
         wpc.norm_offset = 0;
         wpc.open_flags = 0;
 
-
         // open the source file for reading and store the size
 
         while (wps.wphdr.block_samples == 0)
@@ -440,7 +439,6 @@ static        byte temp [] = new byte[32];
     // Read from current file position until a valid 32-byte WavPack 4.0 header is
     // found and read into the specified pointer. If no WavPack header is found within 1 meg,
     // then an error is returned. No additional bytes are read past the header. 
-
     public static WavpackHeader read_next_header(java.io.DataInput infile, WavpackHeader wphdr)
     {
          long bytes_skipped = 0;
@@ -454,7 +452,7 @@ static        byte temp [] = new byte[32];
             {
                 buffer[i] = buffer[32 - bleft + i];
             }
-
+          
             counter = 0;
 
             try
@@ -463,6 +461,7 @@ static        byte temp [] = new byte[32];
             }
             catch (Exception e)
             { 
+            	//e.printStackTrace();
                 wphdr.status = 1;
                 return wphdr;
             }
@@ -632,7 +631,11 @@ static        byte temp [] = new byte[32];
 			return ((RandomAccessFile) infile).getFilePointer();
 		}
 		try {
-			return (Long) infile.getClass().getMethod("seek", long.class).invoke(infile, pos);
+			Object res = infile.getClass().getMethod("seek", long.class).invoke(infile, pos);
+			if (res != null && res instanceof Long)
+				return (Long)res;
+			return (Long) infile.getClass().getMethod("getFilePointer").invoke(infile);
+			//return pos;
 		} catch (Exception e) {
 			Throwable t = e;
 			if (e instanceof InvocationTargetException) {
@@ -640,7 +643,7 @@ static        byte temp [] = new byte[32];
 				if (t instanceof IOException)
 					throw (IOException) t;
 			}
-			throw new IllegalArgumentException("Seek operation isn't supported by underline stream:" + infile, t);
+			throw new IllegalArgumentException("Seek operation isn't supported by the underline stream:" + infile, t);
 		}
 	}
 
