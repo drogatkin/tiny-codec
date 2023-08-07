@@ -48,6 +48,8 @@ import java.io.IOException;
 public class MP3File extends java.io.File {
 	public static final String DEF_ASCII_ENCODING = "ISO8859_1";
 	public static final String UNICODE_ENCODING = "UNICODE";  //"Unicode"	
+	private File principal;
+	
     /********** Constructors **********/
 
     /**
@@ -114,7 +116,9 @@ public class MP3File extends java.io.File {
       ID3v2DecompressionException, ID3v2IllegalVersionException
     {
 	super(dir, filename);
-
+	if (filename.isEmpty()) {
+		principal = dir;
+	}
 	// read properties and tags
     reset(encoding);
     }
@@ -165,6 +169,12 @@ public class MP3File extends java.io.File {
 	super(dir, filename);
 	// read properties and tags
     reset(encoding);
+    }
+    
+    public File getPrincipal() {
+    	if (principal == null)
+    		return this;
+    	return principal;
     }
 
     /********** Public methods **********/

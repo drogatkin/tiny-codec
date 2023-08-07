@@ -216,6 +216,10 @@ public class MP3Properties implements Serializable
 
   /********** Private methods **********/
 
+  protected InputStream getInputStream(File file) throws IOException {
+	  return new FileInputStream(file);
+  }
+  
   /**
    * Read properties from MP3 file
    *
@@ -226,7 +230,7 @@ public class MP3Properties implements Serializable
   protected void readProperties(File file) throws IOException, NoMP3FrameException
     {
       this.file = file;
-      FileInputStream in = new FileInputStream(file);
+      InputStream in = getInputStream(file);
 
       // if no ID3v2 tag is present, we must undo the 10 bytes skip
       // done by checking
@@ -239,7 +243,7 @@ public class MP3Properties implements Serializable
 	{
 	  // no tag, restart stream
           in.close();
-	  in = new FileInputStream(file);
+	  in = getInputStream(file);
 	}
 
       // synchronize to next MP3 frame
@@ -317,7 +321,7 @@ public class MP3Properties implements Serializable
    * @return Size of ID3v2 tag or 0 if not present
    * @exception IOException If an I/O error occurs
    */
-  protected int skipID3v2(FileInputStream in) throws IOException
+  protected int skipID3v2(InputStream in) throws IOException
     {
       ID3v2Header header = null;
       try
@@ -350,7 +354,7 @@ public class MP3Properties implements Serializable
    * @exception IOException If an I/O error occurs
    * @exception NoMP3FrameException If file does not contain at least one mp3 frame
    */
-  protected int synchronize(FileInputStream in) throws IOException, NoMP3FrameException
+  protected int synchronize(InputStream in) throws IOException, NoMP3FrameException
     {
       // skip until start of header (at least 11 bits in a row set to 1)
       boolean finished = false;
