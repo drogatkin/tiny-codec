@@ -29,7 +29,7 @@ import java.io.IOException;
  */
 public class RandomAccessFile extends File {
     private java.io.RandomAccessFile file = null;
-    private java.io.File f = null;
+    protected java.io.File f = null;
     private long markPosition = -1;
 
     public RandomAccessFile(final java.io.File file, final String mode) throws FileNotFoundException {
