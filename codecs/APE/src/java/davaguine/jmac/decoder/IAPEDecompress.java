@@ -195,9 +195,17 @@ public abstract class IAPEDecompress {
 
         // get the extension
         if (in.isLocal()) {
-            final String pFilename = in.getFilename();
-            final String pExtension = in.getExtension();
-
+            /*final*/ String pFilename = in.getFilename();
+            /*final*/ String pExtension = in.getExtension();
+            if (pExtension.equals(".mp3")) {
+            	// try to check the hack
+            	pFilename = pFilename.substring(0, pFilename.length()-4);
+            	int index = pFilename.lastIndexOf('.');
+            	if (index >= 0) {
+            		pExtension = pFilename.substring(index);
+            		pFilename = pFilename.substring(0, index);
+            	}
+            }
             // take the appropriate action (based on the extension)
             if (pExtension.toLowerCase().equals(".apl")) {
                 // "link" file (.apl linked large APE file)
